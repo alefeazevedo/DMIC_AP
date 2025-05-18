@@ -2,20 +2,63 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Visualizador de PDF - DMIC</title>
+  <title>DMIC - Visualizador de PDF</title>
+  <script src="pdfjs/pdf.js"></script>
   <style>
     body {
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
     }
-    iframe {
-      width: 100vw;
+    #pdf-viewer {
+      width: 100%;
       height: 100vh;
-      border: none;
+      overflow: auto;
+      background: #eee;
+      padding: 10px;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto 20px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <iframe src="DMIC_pdf.pdf"></iframe>
+  <h1 style="text-align: center;">Visualizador do PDF - DMIC</h1>
+  <div id="pdf-viewer"></div>
+
+  <script>
+    // URL do PDF
+    const url = 'DMIC_pdf.pdf';
+
+    // Caminho base do PDF.js
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs/pdf.worker.js';
+
+    // Carrega o PDF
+    pdfjsLib.getDocument(url).promise.then(function(pdf) {
+      const viewer = document.getElementById('pdf-viewer');
+
+      // Renderiza todas as páginas
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        pdf.getPage(pageNumber).then(function(page) {
+          const canvas = document.createElement('canvas');
+          viewer.appendChild(canvas);
+
+          const context = canvas.getContext('2d');
+          const viewport = page.getViewport({ scale: 1.5 });
+
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          page.render({
+            canvasContext: context,
+            viewport: viewport
+          });
+        });
+      }
+    });
+  </script>
 </body>
 </html>
